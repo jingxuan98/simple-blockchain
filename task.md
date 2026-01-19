@@ -23,10 +23,10 @@
         5. `getbalance Bob` shows 10.
 
 ## Phase 3: P2P Networking (The Nervous System)
-* [ ] **Step 3.1:** Setup TCP Listener & Command Parser.
-* [ ] **Step 3.2:** Implement Handshake (`VERSION` message).
-* [ ] **Step 3.3:** Implement Block Propagation (`INV`, `GETDATA`, `BLOCK`).
-* [ ] **Step 3.4:** **VERIFICATION (The "Twin Nodes" Demo):**
+* [x] **Step 3.1:** Setup TCP Listener & Command Parser.
+* [x] **Step 3.2:** Implement Handshake (`VERSION` message).
+* [x] **Step 3.3:** Implement Block Propagation (`INV`, `GETDATA`, `BLOCK`).
+* [x] **Step 3.4:** **VERIFICATION (The "Twin Nodes" Demo):**
     * Create a startup flag `NODE_ID` to run multiple instances.
     * Success Criteria:
         1. Open Terminal A (Node 3000).

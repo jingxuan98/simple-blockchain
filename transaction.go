@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 	"strings"
 )
 
@@ -191,7 +192,7 @@ func NewUTXOTransaction(from, to string, amount int, bc *Blockchain) *Transactio
 	var inputs []TXInput
 	var outputs []TXOutput
 
-	wallets, err := NewWallets()
+	wallets, err := NewWallets(os.Getenv("NODE_ID"))
 	if err != nil {
 		log.Panic(err)
 	}

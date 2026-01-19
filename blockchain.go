@@ -8,11 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 
 	"go.etcd.io/bbolt"
 )
 
-const dbFile = "blockchain.db"
+const dbFile = "blockchain_%s.db"
 const blocksBucket = "blocks"
 const mempoolBucket = "mempool"
 
@@ -304,13 +305,109 @@ func (i *BlockchainIterator) Next() *Block {
 	return block
 }
 
+// GetBestHeight returns the height of the latest block
+func (bc *Blockchain) GetBestHeight() int {
+	height := 0
+	bci := bc.Iterator()
+
+	for {
+		block := bci.Next()
+		height++
+		if len(block.PrevBlockHash) == 0 {
+			break
+		}
+	}
+
+	return height
+}
+
+// GetBlockHashes returns a list of hashes of all the blocks in the chain
+func (bc *Blockchain) GetBlockHashes() [][]byte {
+	var blocks [][]byte
+	bci := bc.Iterator()
+
+	for {
+		block := bci.Next()
+		blocks = append(blocks, block.Hash)
+
+		if len(block.PrevBlockHash) == 0 {
+			break
+		}
+	}
+
+	return blocks
+}
+
+// GetBlock finds a block by its hash and returns it
+func (bc *Blockchain) GetBlock(blockHash []byte) (Block, error) {
+	var block Block
+
+	err := bc.db.View(func(tx *bbolt.Tx) error {
+		b := tx.Bucket([]byte(blocksBucket))
+
+		blockData := b.Get(blockHash)
+
+		if blockData == nil {
+			return errors.New("Block is not found.")
+		}
+
+		block = *DeserializeBlock(blockData)
+
+		return nil
+	})
+	if err != nil {
+		return block, err
+	}
+
+	return block, nil
+}
+
+// AddBlock saves the block into the blockchain
+func (bc *Blockchain) AddBlock(block *Block) {
+	err := bc.db.Update(func(tx *bbolt.Tx) error {
+		b := tx.Bucket([]byte(blocksBucket))
+		blockInDb := b.Get(block.Hash)
+
+		if blockInDb != nil {
+			return nil
+		}
+
+		blockData := block.Serialize()
+		err := b.Put(block.Hash, blockData)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		lastHash := b.Get([]byte("l"))
+		lastBlockData := b.Get(lastHash)
+		lastBlock := DeserializeBlock(lastBlockData)
+
+		// For now, blindly update the tip.
+		// Ideally we should check if new block's work > current tip's work.
+		// But since we sync in order (Genesis -> Tip), the last added block should be the tip.
+		_ = lastBlock // suppress unused variable if needed, or remove lines above
+
+		err = b.Put([]byte("l"), block.Hash)
+		if err != nil {
+			log.Panic(err)
+		}
+		bc.tip = block.Hash
+
+		return nil
+	})
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
 // NewBlockchain creates a new Blockchain with genesis block
 // Similar to Geth's core.NewBlockChain()
-func NewBlockchain(address string) *Blockchain {
+func NewBlockchain(address, nodeID string) *Blockchain {
 	var tip []byte
 
 	// Open database
-	db, err := bbolt.Open(dbFile, 0600, nil)
+	dbPath := fmt.Sprintf(dbFile, nodeID)
+	db, err := bbolt.Open(dbPath, 0600, nil)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -319,7 +416,13 @@ func NewBlockchain(address string) *Blockchain {
 		b := tx.Bucket([]byte(blocksBucket))
 
 		if b == nil {
-			// No blockchain exists, create genesis block
+			// No blockchain exists
+			if address == "" {
+				fmt.Println("No existing blockchain found. Please create one first using 'createblockchain'.")
+				os.Exit(1)
+			}
+
+			// Create genesis block
 			fmt.Println("No existing blockchain found. Creating a new one...")
 			cbtx := NewCoinbaseTX(address, "Genesis Block")
 			genesis := NewBlock([]*Transaction{cbtx}, []byte{})
