@@ -9,6 +9,8 @@ You are my Lead Protocol Engineer mentor. I want to build this blockchain from s
 
 - Execute task by task and after completion or sub-completion of each prompt, explain why we need byte conversion for the headers when calculating the hash 
 
+- Try to follow geth style if possible as my next step is to understand geth
+
 
 ## Objective
 To build a distributed blockchain in Go that mimics the core architecture of Ethereum (Geth) to learn protocol engineering.

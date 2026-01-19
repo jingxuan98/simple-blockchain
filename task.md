@@ -1,19 +1,19 @@
 # Implementation Roadmap & Verification
 
 ## Phase 1: The Core Engine (Storage & Mining)
-* [ ] **Step 1.1:** Create `Block` struct & Hash logic.
-* [ ] **Step 1.2:** Implement `ProofOfWork` (Target bits logic).
-* [ ] **Step 1.3:** Create `Blockchain` struct with DB persistence.
-* [ ] **Step 1.4:** **VERIFICATION (The "Visual Chain"):**
+* [x] **Step 1.1:** Create `Block` struct & Hash logic.
+* [x] **Step 1.2:** Implement `ProofOfWork` (Target bits logic).
+* [x] **Step 1.3:** Create `Blockchain` struct with DB persistence.
+* [x] **Step 1.4:** **VERIFICATION (The "Visual Chain"):**
     * Create a CLI command `printchain`.
     * Output: Format the block data cleanly (e.g., "PrevHash: x... Hash: y... Nonce: 1234").
     * Success Criteria: Run the app, add 3 blocks, restart app, print chain. The blocks must still be there (persistence works).
 
 ## Phase 2: Wallets & Transactions (The State Machine)
-* [ ] **Step 2.1:** Implement `Wallet` generation & Address derivation.
-* [ ] **Step 2.2:** Implement `Transaction` struct & Signing logic.
-* [ ] **Step 2.3:** Implement `Mempool` & Update Mining logic.
-* [ ] **Step 2.4:** **VERIFICATION (The "Spending" Demo):**
+* [x] **Step 2.1:** Implement `Wallet` generation & Address derivation.
+* [x] **Step 2.2:** Implement `Transaction` struct & Signing logic.
+* [x] **Step 2.3:** Implement `Mempool` & Update Mining logic.
+* [x] **Step 2.4:** **VERIFICATION (The "Spending" Demo):**
     * Create CLI commands: `createwallet`, `getbalance`, `send`.
     * Success Criteria:
         1. Create two wallets (Alice, Bob).
